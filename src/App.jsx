@@ -1,143 +1,125 @@
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
-
+import axios from "axios";
 import FileEditor from "./components/FileEditor";
-
-// import FolderTree from "react-folder-tree";
-import "react-folder-tree/dist/style.css";
 import MenuEditor from "./components/MenuEditor";
 
 function App() {
+  const editorRef = useRef(null);
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
-  const [file, setFile] = useState(null);
   const [data, setData] = useState([
     {
       id: 1,
       name: "file 1",
       extention: "js",
       content: `console.log('file1')
-const toto = () => {
+      const toto = () => {
   return "file1 xsd"
 };
 
 window.toto = window.toto  || toto;
-    `,
+`,
     },
     {
       id: 2,
       name: "file 2",
       extention: "js",
-      content: `console.log('file2')
-console.log(window.toto())
-      `,
+      content: `
+function coucou (a,b) {
+  return a + b;
+}
+console.log(coucou(1,4))
+  `,
+    },
+    {
+      id: 3,
+      name: "file 3",
+      extention: "js",
+      content: `
+function coucou (a,b) {
+  return a + b;
+}
+console.log(coucou(1,2))
+console.log(coucou(1,2))
+  `,
     },
   ]);
-  // const fakeData = [
-  //   {
-  //     name: "Dossier1",
-  //     children: [
-  //       {
-  //         checked: 0,
-  //         name: "file1",
-  //         id: 1,
-  //         code: `
-  //         console.log("dossier 1 - file 1")
-  //         `,
-  //       },
-  //       {
-  //         checked: 0,
-  //         name: "file2",
-  //         id: 2,
-  //         code: `
-  //         console.log("dossier 1 - file 2")
-  //         `,
-  //       },
-  //       {
-  //         checked: 0,
-  //         name: "file3",
-  //         id: 3,
-  //         code: `
-  //         console.log("dossier 1 - file 3")
-  //         `,
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     name: "Dossier2",
-  //     children: [
-  //       {
-  //         checked: 0,
-  //         name: "file1",
-  //         id: 1,
-  //         code: `
-  //         console.log("dossier 2 - file 1")
-  //         `,
-  //       },
-  //       {
-  //         checked: 0,
-  //         name: "file2",
-  //         id: 2,
-  //         code: `
-  //         console.log("dossier 2 - file 2")
-  //         `,
-  //       },
-  //       {
-  //         checked: 0,
-  //         name: "file3",
-  //         id: 3,
-  //         code: `
-  //         console.log("dossier 2 - file 3")
-  //         `,
-  //       },
-  //     ],
-  //   },
-  // ];
-  const handleClick = () => {
+
+  const [file, setFile] = useState(data[0]);
+  const LANGUAGE_VERSIONS = {
+    javascript: "18.15.0",
+    typescript: "5.0.3",
+    python: "3.10.0",
+    java: "15.0.2",
+    csharp: "6.12.0",
+    php: "8.2.3",
+  };
+
+  const CODE_SNIPPETS = {
+    javascript: `\nfunction greet(name) {\n\tconsole.log("Hello, " + name + "!");\n}\n\ngreet("Alex");\n`,
+    typescript: `\ntype Params = {\n\tname: string;\n}\n\nfunction greet(data: Params) {\n\tconsole.log("Hello, " + data.name + "!");\n}\n\ngreet({ name: "Alex" });\n`,
+    python: `\ndef greet(name):\n\tprint("Hello, " + name + "!")\n\ngreet("Alex")\n`,
+    java: `\npublic class HelloWorld {\n\tpublic static void main(String[] args) {\n\t\tSystem.out.println("Hello World");\n\t}\n}\n`,
+    csharp:
+      'using System;\n\nnamespace HelloWorld\n{\n\tclass Hello { \n\t\tstatic void Main(string[] args) {\n\t\t\tConsole.WriteLine("Hello World in C#");\n\t\t}\n\t}\n}\n',
+    php: "<?php\n\n$name = 'Alex';\necho $name;\n",
+  };
+
+  const API = axios.create({
+    baseURL: "https://emkc.org/api/v2/piston",
+  });
+
+  const executeCode = async (language, sourceCode) => {
+    console.log("source code", sourceCode);
+    console.log("language", language);
+    const response = await API.post("/execute", {
+      language: language,
+      version: LANGUAGE_VERSIONS[language],
+      files: sourceCode,
+    });
+    return response.data;
+  };
+
+  const handleClick = async () => {
+    console.log(code);
+
+    if (!code) return;
     try {
-      const logMessages = [];
 
-      const customConsoleLog = (...args) => {
-        logMessages.push(args.map((arg) => arg).join(" "));
-      };
+      const { run: result } = await executeCode("javascript", [
+        { content: code },
+        { content: code },
+      ]);
+      console.log(result);
 
-      console.log = customConsoleLog;
-
-      // Exécutez le code
-      eval(code);
-
-      // Mettez à jour la sortie
-      setOutput(logMessages.join("\n"));
     } catch (error) {
-      if (error.message === "Invalid or unexpected token") {
-        setOutput(`Erreur d'exécution : syntax invalid !`);
-      } else {
-        setOutput(`Erreur d'exécution : ${error.message}`);
-      }
+      console.log(error);
+
+    } finally {
+      console.log("toto");
+
     }
   };
 
   useEffect(() => {
-    // console.log(code);
-    // setCode()
     if (file) {
       console.log(file.content);
       setCode(file.content);
     }
   }, [file]);
 
-  // const onTreeStateChange = (state, event) => console.log(state, event);
-  // console.log("test data0", testData);
   return (
     <>
       <p>toto</p>
-      {/* <FolderTree data={fakeData} onChange={onTreeStateChange} /> */}
-      {/* {fakeData.map((data) => {
-        return <FolderTree data={data} onChange={onTreeStateChange} />;
-      })} */}
       <MenuEditor data={data} setFile={setFile} />
-      <FileEditor code={code} setCode={setCode} file={file} setData={setData} />
+      <FileEditor
+        code={code}
+        setCode={setCode}
+        file={file}
+        setData={setData}
+        editorRef={editorRef}
+      />
       <button type="submit" onClick={handleClick}>
         RUN
       </button>

@@ -14,6 +14,7 @@ function App() {
     setCode(value);
 
     try {
+
       const logMessages = [];
 
       const customConsoleLog = (...args) => {
