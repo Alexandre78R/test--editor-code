@@ -1,11 +1,7 @@
-import { useEffect, useRef } from "react";
-import { LiveProvider, LiveEditor, LiveError, LivePreview } from "react-live";
-import MonacoEditor, { useMonaco } from "@monaco-editor/react";
+import { useEffect } from "react";
+import MonacoEditor from "@monaco-editor/react";
 
-const FileEditor = ({ code, setCode, file, setData, editorRef }) => {
-  //   const editorRef = useRef(null);
-  const monaco = useMonaco();
-
+const FileEditor = ({ code, setCode, file, setData, editorRef, language }) => {
   const handleChange = (editor) => {
     editorRef.current = editor;
     setCode(editor);
@@ -25,14 +21,6 @@ const FileEditor = ({ code, setCode, file, setData, editorRef }) => {
     }
   }, []);
 
-  function handleEditorDidMount(editor, monaco) {
-    editorRef.current = editor;
-  }
-
-  function toto() {
-    console.log("toto");
-  }
-
   return (
     <>
       <p>toto</p>
@@ -40,32 +28,10 @@ const FileEditor = ({ code, setCode, file, setData, editorRef }) => {
         ref={editorRef}
         width="80vh"
         height="50vh"
-        language="javascript"
-        defaultValue="// some comment"
+        language={language}
         value={code}
-        onMount={handleEditorDidMount}
         onChange={handleChange}
       />
-
-      {/* <LiveProvider code={code}>
-        <div>
-          <MonacoEditor
-            ref={editorRef}
-            width="80vh"
-            height="50vh"
-            language="javascript"
-            defaultValue="// some comment"
-            value={code}
-            onMount={handleEditorDidMount}
-            onChange={handleChange}
-          />
-        </div>
-        <div>
-          <LivePreview />
-        </div>
-        <LiveError />
-        <button onClick={toto}></button>
-      </LiveProvider> */}
     </>
   );
 };
