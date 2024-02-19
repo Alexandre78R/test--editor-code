@@ -27,7 +27,7 @@ const FileEditor = ({ code, setCode, file, setData, editorRef, language }) => {
       <MonacoEditor
         ref={editorRef}
         width="80vh"
-        height="50vh"
+        height="40vh"
         language={language}
         value={code}
         onChange={handleChange}

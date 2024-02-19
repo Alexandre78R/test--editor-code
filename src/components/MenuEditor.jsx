@@ -7,6 +7,7 @@ const MenuEditor = ({ data, setFile }) => {
   };
   return (
     <>
+      <h4>Liste des Fichiers :</h4>
       {data?.map((data) => {
         return (
           <li onClick={() => handleClick(data)}>

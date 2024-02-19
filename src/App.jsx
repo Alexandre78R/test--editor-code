@@ -9,11 +9,13 @@ function App() {
   const editorRef = useRef(null);
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+  const [language, setLanguage] = useState("");
   const [data, setData] = useState([
     {
       id: 1,
-      name: "file 1",
+      name: "file1",
       extention: "js",
+      language: "javascript",
       content: `console.log('file1')
       const toto = () => {
   return "file1 xsd"
@@ -24,19 +26,30 @@ window.toto = window.toto  || toto;
     },
     {
       id: 2,
-      name: "file 2",
-      extention: "js",
+      name: "file2",
+      extention: "php",
+      language: "php",
       content: `
-function coucou (a,b) {
-  return a + b;
+<?php
+
+$name = 'Alex';
+echo $name;
+
+
+function coucou ($name) {
+  return "coucou $name !";
 }
-console.log(coucou(1,4))
-  `,
+
+echo  "\n".coucou("toto");
+echo  "
+".coucou($name);
+      `,
     },
     {
       id: 3,
-      name: "file 3",
+      name: "file3",
       extention: "js",
+      language: "javascript",
       content: `
 function coucou (a,b) {
   return a + b;
@@ -48,38 +61,47 @@ console.log(coucou(1,2))
   ]);
 
   const [file, setFile] = useState(data[0]);
-  const [language, setLanguage] = useState("");
 
   const handleClick = async () => {
-    if (!code) return;
+    if (!code)
+      return setOutput("Merci de mettre du code dans l'éditeur de code !");
     if (!language)
       return console.error("Merci de choisir un luangage de programation");
     try {
-      const { run: result } = await executeCode(language, [
-        { content: code },
-        { content: code },
-      ]);
+      const { run: result } = await executeCode(language, [{ content: code }]);
       console.log(result);
       setOutput(result.output);
     } catch (error) {
       console.log(error);
-    } finally {
-      console.log("toto");
     }
   };
 
   useEffect(() => {
     if (file) {
-      console.log(file.content);
+      console.log(file);
+      setLanguage(file.language);
       setCode(file.content);
     }
   }, [file]);
 
+  useEffect(() => {
+    if (language) {
+      console.log("modif changement de language");
+
+      console.warn("NOTE : gérer le select correctement ici !");
+    }
+  }, [language]);
+
   return (
     <>
-      <p>toto</p>
-      <MenuEditor data={data} setFile={setFile} />
-      <LanguageEditor setLanguage={setLanguage} />
+      <div className="parent">
+        <div className="MenuEditor">
+          <MenuEditor data={data} setFile={setFile} />
+        </div>
+        <div className="LanguageEditor">
+          <LanguageEditor setLanguage={setLanguage} />
+        </div>
+      </div>
       <FileEditor
         code={code}
         setCode={setCode}
